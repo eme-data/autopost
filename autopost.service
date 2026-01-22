@@ -1,0 +1,29 @@
+# Service systemd pour AutoPost (alternative à PM2)
+# Installation : sudo cp autopost.service /etc/systemd/system/
+# Activer : sudo systemctl enable autopost
+# Démarrer : sudo systemctl start autopost
+# Statut : sudo systemctl status autopost
+
+[Unit]
+Description=AutoPost - Générateur de Posts IA
+Documentation=https://github.com/votre-repo
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/autopost/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/autopost/backend/.env
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/autopost/output.log
+StandardError=append:/var/log/autopost/error.log
+
+# Limites de sécurité
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
