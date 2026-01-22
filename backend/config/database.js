@@ -42,8 +42,31 @@ class Database {
         length TEXT,
         include_hashtags BOOLEAN,
         include_emojis BOOLEAN,
+        published_to_linkedin BOOLEAN DEFAULT 0,
+        published_to_facebook BOOLEAN DEFAULT 0,
+        linkedin_post_url TEXT,
+        facebook_post_url TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
+    // Table des comptes sociaux connectés
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS social_accounts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        platform TEXT NOT NULL,
+        platform_user_id TEXT NOT NULL,
+        platform_username TEXT,
+        access_token TEXT NOT NULL,
+        refresh_token TEXT,
+        expires_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, platform)
       )
     `);
 

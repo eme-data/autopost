@@ -7,6 +7,8 @@ const rateLimit = require('express-rate-limit');
 // Import routes
 const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
+const oauthRoutes = require('./routes/oauth');
+const publishRoutes = require('./routes/publish');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +38,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
+app.use('/api/oauth', oauthRoutes);
+app.use('/api/publish', publishRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {

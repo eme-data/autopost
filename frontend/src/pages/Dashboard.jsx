@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Generator from '../components/Generator';
 import History from '../components/History';
+import SocialAccountsManager from '../components/SocialAccountsManager';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -50,13 +51,20 @@ const Dashboard = () => {
           display: 'flex',
           gap: '10px',
           marginBottom: '20px',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          flexWrap: 'wrap'
         }}>
           <button
             className={`btn ${activeTab === 'generator' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('generator')}
           >
             Générateur
+          </button>
+          <button
+            className={`btn ${activeTab === 'accounts' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveTab('accounts')}
+          >
+            Comptes sociaux
           </button>
           <button
             className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
@@ -67,9 +75,15 @@ const Dashboard = () => {
         </div>
 
         {/* Content */}
-        {activeTab === 'generator' ? (
+        {activeTab === 'generator' && (
           <Generator onPostGenerated={handlePostGenerated} />
-        ) : (
+        )}
+
+        {activeTab === 'accounts' && (
+          <SocialAccountsManager />
+        )}
+
+        {activeTab === 'history' && (
           <History refresh={refreshHistory} />
         )}
       </div>

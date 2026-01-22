@@ -48,4 +48,17 @@ export const postsAPI = {
   deletePost: (id) => api.delete(`/posts/${id}`)
 };
 
+export const oauthAPI = {
+  getLinkedInAuthUrl: () => api.get('/oauth/linkedin/auth-url'),
+  getFacebookAuthUrl: () => api.get('/oauth/facebook/auth-url'),
+  getConnectedAccounts: () => api.get('/oauth/connected-accounts'),
+  disconnectAccount: (platform) => api.delete(`/oauth/disconnect/${platform}`)
+};
+
+export const publishAPI = {
+  publishToLinkedIn: (data) => api.post('/publish/linkedin', data),
+  publishToFacebook: (data) => api.post('/publish/facebook', data),
+  publishToBoth: (data) => api.post('/publish/both', data)
+};
+
 export default api;
