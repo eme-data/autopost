@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Generator from '../components/Generator';
 import History from '../components/History';
+import SocialAccountsManager from '../components/SocialAccountsManager';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -25,9 +26,19 @@ const Dashboard = () => {
         <div className="navbar-content">
           <div className="navbar-brand">AutoPost AI</div>
           <div className="navbar-user">
+            {user?.role === 'admin' && (
+              <span style={{ color: '#c53030', fontWeight: 'bold', marginRight: '10px' }}>
+                👑 ADMIN
+              </span>
+            )}
             <span>
               {user?.firstname} {user?.lastname}
             </span>
+            {user?.role === 'admin' && (
+              <button onClick={() => navigate('/admin')} className="btn btn-primary">
+                Administration
+              </button>
+            )}
             <button onClick={handleLogout} className="btn btn-secondary">
               Déconnexion
             </button>
@@ -50,13 +61,20 @@ const Dashboard = () => {
           display: 'flex',
           gap: '10px',
           marginBottom: '20px',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          flexWrap: 'wrap'
         }}>
           <button
             className={`btn ${activeTab === 'generator' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('generator')}
           >
             Générateur
+          </button>
+          <button
+            className={`btn ${activeTab === 'accounts' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveTab('accounts')}
+          >
+            Comptes sociaux
           </button>
           <button
             className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
@@ -67,9 +85,15 @@ const Dashboard = () => {
         </div>
 
         {/* Content */}
-        {activeTab === 'generator' ? (
+        {activeTab === 'generator' && (
           <Generator onPostGenerated={handlePostGenerated} />
-        ) : (
+        )}
+
+        {activeTab === 'accounts' && (
+          <SocialAccountsManager />
+        )}
+
+        {activeTab === 'history' && (
           <History refresh={refreshHistory} />
         )}
       </div>
