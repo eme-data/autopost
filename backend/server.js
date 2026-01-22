@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
 const oauthRoutes = require('./routes/oauth');
 const publishRoutes = require('./routes/publish');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/publish', publishRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {

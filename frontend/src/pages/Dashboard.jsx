@@ -26,9 +26,19 @@ const Dashboard = () => {
         <div className="navbar-content">
           <div className="navbar-brand">AutoPost AI</div>
           <div className="navbar-user">
+            {user?.role === 'admin' && (
+              <span style={{ color: '#c53030', fontWeight: 'bold', marginRight: '10px' }}>
+                👑 ADMIN
+              </span>
+            )}
             <span>
               {user?.firstname} {user?.lastname}
             </span>
+            {user?.role === 'admin' && (
+              <button onClick={() => navigate('/admin')} className="btn btn-primary">
+                Administration
+              </button>
+            )}
             <button onClick={handleLogout} className="btn btn-secondary">
               Déconnexion
             </button>

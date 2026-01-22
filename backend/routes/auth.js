@@ -67,7 +67,8 @@ router.post('/register', registerValidation, async (req, res) => {
         id: result.id,
         email,
         firstname,
-        lastname
+        lastname,
+        role: 'user'
       }
     });
 
@@ -132,7 +133,8 @@ router.post('/login', loginValidation, async (req, res) => {
         id: user.id,
         email: user.email,
         firstname: user.firstname,
-        lastname: user.lastname
+        lastname: user.lastname,
+        role: user.role || 'user'
       }
     });
 
@@ -160,7 +162,7 @@ router.get('/verify', async (req, res) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await db.get('SELECT id, email, firstname, lastname FROM users WHERE id = ?', [decoded.id]);
+    const user = await db.get('SELECT id, email, firstname, lastname, role FROM users WHERE id = ?', [decoded.id]);
 
     if (!user) {
       return res.status(401).json({

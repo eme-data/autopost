@@ -24,10 +24,25 @@ class Database {
         password TEXT NOT NULL,
         firstname TEXT,
         lastname TEXT,
+        role TEXT DEFAULT 'user',
+        is_active BOOLEAN DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         last_login DATETIME
       )
     `);
+
+    // Ajouter la colonne role si elle n'existe pas (migration)
+    this.db.run(`
+      ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'
+    `, () => {
+      // Ignorer l'erreur si la colonne existe déjà
+    });
+
+    this.db.run(`
+      ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1
+    `, () => {
+      // Ignorer l'erreur si la colonne existe déjà
+    });
 
     // Table des posts générés
     this.db.run(`
@@ -67,6 +82,36 @@ class Database {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id),
         UNIQUE(user_id, platform)
+      )
+    `);
+
+    // Table de configuration (pour stocker les clés API et paramètres)
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT UNIQUE NOT NULL,
+        value TEXT,
+        category TEXT,
+        description TEXT,
+        is_sensitive BOOLEAN DEFAULT 0,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_by INTEGER,
+        FOREIGN KEY (updated_by) REFERENCES users(id)
+      )
+    `);
+
+    // Table de logs d'audit
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        action TEXT NOT NULL,
+        resource TEXT,
+        resource_id INTEGER,
+        details TEXT,
+        ip_address TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
       )
     `);
 

@@ -61,4 +61,23 @@ export const publishAPI = {
   publishToBoth: (data) => api.post('/publish/both', data)
 };
 
+export const adminAPI = {
+  // Statistiques
+  getStats: () => api.get('/admin/stats'),
+
+  // Utilisateurs
+  getUsers: (params) => api.get('/admin/users', { params }),
+  getUser: (id) => api.get(`/admin/users/${id}`),
+  updateUserRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
+  updateUserStatus: (id, is_active) => api.put(`/admin/users/${id}/status`, { is_active }),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
+
+  // Configuration
+  getSettings: () => api.get('/admin/settings'),
+  updateSetting: (key, value) => api.put(`/admin/settings/${key}`, { value }),
+
+  // Logs d'audit
+  getAuditLogs: (params) => api.get('/admin/audit-logs', { params })
+};
+
 export default api;
