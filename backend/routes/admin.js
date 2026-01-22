@@ -469,4 +469,37 @@ router.get('/audit-logs', async (req, res) => {
   }
 });
 
+// ============================================
+// GESTION DE LA CONFIGURATION
+// ============================================
+
+// Recharger la configuration (invalider le cache)
+router.post('/settings/reload', async (req, res) => {
+  try {
+    // Si le module settings existe, recharger le cache
+    const settingsManager = require('../config/settings');
+    if (settingsManager && settingsManager.clearCache) {
+      settingsManager.clearCache();
+    }
+
+    // Log d'audit
+    await db.run(
+      'INSERT INTO audit_logs (user_id, action, resource) VALUES (?, ?, ?)',
+      [req.user.id, 'RELOAD_SETTINGS', 'settings']
+    );
+
+    res.json({
+      success: true,
+      message: 'Configuration rechargée avec succès'
+    });
+
+  } catch (error) {
+    console.error('Erreur lors du rechargement:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
 module.exports = router;

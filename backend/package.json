@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "init-db": "node scripts/initDb.js"
+    "init-db": "node scripts/initDb.js",
+    "init-settings": "node init-settings.js",
+    "create-admin": "node create-admin.js"
   },
   "keywords": ["social-media", "ai", "claude", "gemini"],
   "author": "",
