@@ -84,8 +84,15 @@ fi
 # Mettre à jour la configuration Nginx avec le domaine
 echo -e "${YELLOW}[3/6] Mise à jour de la configuration Nginx...${NC}"
 
-# Backup de la config actuelle
-cp /etc/nginx/sites-available/autopost /etc/nginx/sites-available/autopost.backup
+# Backup de la config actuelle si elle existe
+if [ -f /etc/nginx/sites-available/autopost ]; then
+    cp /etc/nginx/sites-available/autopost /etc/nginx/sites-available/autopost.backup
+    echo -e "${GREEN}✓ Backup de la configuration créé${NC}"
+else
+    echo -e "${RED}✗ Fichier de configuration Nginx non trouvé${NC}"
+    echo "Veuillez d'abord déployer l'application avec ./deploy.sh"
+    exit 1
+fi
 
 # Mettre à jour le server_name
 sed -i "s/server_name .*/server_name $DOMAIN;/" /etc/nginx/sites-available/autopost
