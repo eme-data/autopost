@@ -379,6 +379,50 @@ autopost/
 - Headers de sécurité avec Helmet
 - CORS configuré
 - Validation des entrées utilisateur
+- **Support HTTPS/SSL avec Let's Encrypt** (recommandé en production)
+
+## 🔒 Configuration HTTPS (Production)
+
+Pour sécuriser votre application avec HTTPS en production :
+
+### Installation Automatique
+
+```bash
+# Configuration HTTPS avec Let's Encrypt
+./setup-https.sh votre-domaine.com votre@email.com
+```
+
+**Ce que fait le script :**
+- ✅ Installe Certbot (Let's Encrypt)
+- ✅ Obtient un certificat SSL gratuit
+- ✅ Configure Nginx pour HTTPS
+- ✅ Redirige automatiquement HTTP → HTTPS
+- ✅ Met à jour les URLs OAuth
+- ✅ Configure le renouvellement automatique (90 jours)
+
+### Gestion des Certificats
+
+```bash
+# Voir le statut des certificats
+./manage-ssl.sh status
+
+# Informations détaillées
+./manage-ssl.sh info
+
+# Renouveler manuellement
+./manage-ssl.sh renew
+
+# Tester le renouvellement
+./manage-ssl.sh test-renew
+```
+
+### Prérequis pour HTTPS
+
+1. **Nom de domaine** (ex: autopost.example.com)
+2. **DNS configuré** pointant vers l'IP de votre serveur
+3. **Port 80 accessible** depuis Internet
+
+**📚 Guide complet :** Voir `HTTPS_GUIDE.md` pour plus de détails
 
 ## 🐛 Dépannage
 
