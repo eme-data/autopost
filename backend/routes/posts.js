@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { GoogleGenerativeAI } = require('@google/genai');
+const { GoogleGenAI } = require('@google/genai');
 const Groq = require('groq-sdk');
 const db = require('../config/database');
 const authMiddleware = require('../middleware/auth');
@@ -8,7 +8,7 @@ const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 // Initialiser les clients AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Validation des paramètres de génération
