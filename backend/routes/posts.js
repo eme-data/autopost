@@ -67,11 +67,12 @@ function buildPrompt(params) {
 // Fonction pour générer avec Gemini
 async function generateWithGemini(prompt) {
   try {
-    // Utiliser gemini-2.5-flash - modèle 2026 rapide et performant
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
+    // Utiliser l'API v1.38.0 avec gemini-2.5-flash
+    const response = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt
+    });
+    return response.text;
   } catch (error) {
     console.error('Erreur Gemini:', error);
     throw new Error('Erreur lors de la génération avec Gemini');
