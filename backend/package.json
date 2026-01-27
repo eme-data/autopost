@@ -10,7 +10,12 @@
     "init-settings": "node init-settings.js",
     "create-admin": "node create-admin.js"
   },
-  "keywords": ["social-media", "ai", "claude", "gemini"],
+  "keywords": [
+    "social-media",
+    "ai",
+    "claude",
+    "gemini"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -20,7 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.7",
     "dotenv": "^16.3.1",
-    "@google/generative-ai": "^0.17.1",
+    "@google/genai": "^1.38.0",
     "groq-sdk": "^0.7.0",
     "helmet": "^7.1.0",
     "express-rate-limit": "^7.1.5",

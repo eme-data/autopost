@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/genai');
 const Groq = require('groq-sdk');
 const db = require('../config/database');
 const authMiddleware = require('../middleware/auth');
@@ -67,8 +67,8 @@ function buildPrompt(params) {
 // Fonction pour générer avec Gemini
 async function generateWithGemini(prompt) {
   try {
-    // Utiliser gemini-2.0-flash-exp compatible avec l'API actuelle
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    // Utiliser gemini-2.5-flash - modèle 2026 rapide et performant
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
