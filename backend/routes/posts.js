@@ -1,24 +1,21 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const Anthropic = require('@anthropic-ai/sdk');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const db = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
 // Initialiser les clients AI
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
-});
-
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Validation des paramètres de génération
 const generateValidation = [
   body('topic').trim().notEmpty().withMessage('Le sujet est requis'),
   body('platform').isIn(['linkedin', 'facebook']).withMessage('Plateforme invalide'),
-  body('aiModel').isIn(['claude', 'gemini']).withMessage('Modèle IA invalide'),
+  body('aiModel').isIn(['gemini', 'groq']).withMessage('Modèle IA invalide'),
   body('tone').optional().isIn(['professional', 'casual', 'enthusiastic', 'informative']),
   body('length').optional().isIn(['short', 'medium', 'long']),
   body('includeHashtags').optional().isBoolean(),
@@ -67,25 +64,6 @@ function buildPrompt(params) {
   return prompt;
 }
 
-// Fonction pour générer avec Claude
-async function generateWithClaude(prompt) {
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
-      messages: [{
-        role: 'user',
-        content: prompt
-      }]
-    });
-
-    return message.content[0].text;
-  } catch (error) {
-    console.error('Erreur Claude:', error);
-    throw new Error('Erreur lors de la génération avec Claude');
-  }
-}
-
 // Fonction pour générer avec Gemini
 async function generateWithGemini(prompt) {
   try {
@@ -96,6 +74,28 @@ async function generateWithGemini(prompt) {
   } catch (error) {
     console.error('Erreur Gemini:', error);
     throw new Error('Erreur lors de la génération avec Gemini');
+  }
+}
+
+// Fonction pour générer avec Groq
+async function generateWithGroq(prompt) {
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    return chatCompletion.choices[0]?.message?.content || '';
+  } catch (error) {
+    console.error('Erreur Groq:', error);
+    throw new Error('Erreur lors de la génération avec Groq');
   }
 }
 
@@ -125,10 +125,12 @@ router.post('/generate', authMiddleware, generateValidation, async (req, res) =>
 
     // Générer le contenu selon le modèle choisi
     let content;
-    if (aiModel === 'claude') {
-      content = await generateWithClaude(prompt);
-    } else if (aiModel === 'gemini') {
+    if (aiModel === 'gemini') {
       content = await generateWithGemini(prompt);
+    } else if (aiModel === 'groq') {
+      content = await generateWithGroq(prompt);
+    } else {
+      throw new Error('Modèle IA non supporté');
     }
 
     // Sauvegarder le post dans la base de données

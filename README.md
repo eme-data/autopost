@@ -1,11 +1,11 @@
 ﻿# AutoPost - Générateur de Posts IA
 
-Application web pour générer automatiquement des posts LinkedIn et Facebook en utilisant l'IA (Claude d'Anthropic et Gemini de Google) **avec publication automatique sur les réseaux sociaux**.
+Application web pour générer automatiquement des posts LinkedIn et Facebook en utilisant l'IA (Gemini de Google et Groq) **avec publication automatique sur les réseaux sociaux**.
 
 ## 📋 Fonctionnalités
 
 - 🔐 **Authentification sécurisée** avec JWT et hashage bcrypt
-- 🤖 **Double IA** : Claude (Anthropic) et Gemini (Google)
+- 🤖 **Double IA Gratuit** : Gemini (Google) et Groq (ultra-rapide)
 - 📱 **Multi-plateformes** : LinkedIn et Facebook
 - 🎨 **Personnalisation** : ton, longueur, hashtags, emojis
 - 📚 **Historique** : sauvegarde et gestion des posts générés
@@ -49,8 +49,8 @@ chmod +x docker-deploy.sh
 - SQLite (base de données)
 - JWT (authentification)
 - bcryptjs (hashage de mots de passe)
-- @anthropic-ai/sdk (Claude)
 - @google/generative-ai (Gemini)
+- groq-sdk (Groq)
 
 ### Frontend
 - React 18
@@ -127,8 +127,8 @@ FRONTEND_URL=http://votre-domaine.com
 ```
 
 **Obtenir les clés API :**
-- **Claude (Anthropic)** : https://console.anthropic.com/
 - **Gemini (Google)** : https://makersuite.google.com/app/apikey
+- **Groq** : https://console.groq.com/
 
 #### 2. Frontend
 
@@ -226,7 +226,7 @@ sudo certbot --nginx -d votre-domaine.com
 2. **Générer un Post**
    - Saisissez le sujet de votre post
    - Choisissez la plateforme (LinkedIn/Facebook)
-   - Sélectionnez le modèle IA (Claude/Gemini)
+   - Sélectionnez le modèle IA (Gemini/Groq)
    - Personnalisez le ton et la longueur
    - Cliquez sur "Générer le post"
 
@@ -297,7 +297,7 @@ Cette commande importe vos variables `.env` dans la base de données et les rend
 1. Connectez-vous en tant qu'admin
 2. **Administration** → **⚙️ Configuration**
 3. Modifiez les paramètres par catégorie :
-   - API - Intelligence Artificielle (Claude, Gemini)
+   - API - Intelligence Artificielle (Gemini, Groq - Gratuit!)
    - OAuth - LinkedIn (Client ID, Secret, Redirect URI)
    - OAuth - Facebook (App ID, Secret, Redirect URI)
    - Sécurité (JWT Secret, expiration)

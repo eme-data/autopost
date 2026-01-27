@@ -106,8 +106,8 @@ EXTERNAL_PORT=80
 ```
 
 **💡 Obtenir les clés API :**
-- **Anthropic (Claude)** : https://console.anthropic.com/
 - **Google (Gemini)** : https://makersuite.google.com/app/apikey
+- **Groq** : https://console.groq.com/
 - **Groq** : https://console.groq.com/
 - **LinkedIn** : https://www.linkedin.com/developers/
 - **Facebook** : https://developers.facebook.com/

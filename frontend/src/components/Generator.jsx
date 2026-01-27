@@ -5,7 +5,7 @@ const Generator = ({ onPostGenerated }) => {
   const [formData, setFormData] = useState({
     topic: '',
     platform: 'linkedin',
-    aiModel: 'claude',
+    aiModel: 'gemini',
     tone: 'professional',
     length: 'medium',
     includeHashtags: true,
@@ -85,7 +85,7 @@ const Generator = ({ onPostGenerated }) => {
     setFormData({
       topic: '',
       platform: 'linkedin',
-      aiModel: 'claude',
+      aiModel: 'gemini',
       tone: 'professional',
       length: 'medium',
       includeHashtags: true,
@@ -235,8 +235,8 @@ const Generator = ({ onPostGenerated }) => {
               value={formData.aiModel}
               onChange={handleChange}
             >
-              <option value="claude">Claude (Anthropic)</option>
-              <option value="gemini">Gemini (Google)</option>
+              <option value="gemini">Gemini (Google) - Gratuit</option>
+              <option value="groq">Groq (Llama 3.3) - Ultra-rapide</option>
             </select>
           </div>
         </div>
@@ -309,7 +309,7 @@ const Generator = ({ onPostGenerated }) => {
         <div style={{ textAlign: 'center', marginTop: '30px' }}>
           <div className="spinner"></div>
           <p style={{ color: '#718096', marginTop: '10px' }}>
-            Génération en cours avec {formData.aiModel === 'claude' ? 'Claude' : 'Gemini'}...
+            Génération en cours avec {formData.aiModel === 'gemini' ? 'Gemini' : 'Groq'}...
           </p>
         </div>
       )}

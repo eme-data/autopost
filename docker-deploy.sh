@@ -43,13 +43,18 @@ if ! command -v docker &> /dev/null; then
 fi
 print_success "Docker trouvé: $(docker --version)"
 
-# Vérifier que docker-compose est installé
+# Détecter si docker-compose ou docker compose est disponible
 print_step "Vérification de docker-compose..."
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    print_error "docker-compose n'est pas installé."
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+    print_success "docker-compose V1 trouvé"
+elif docker compose version &> /dev/null 2>&1; then
+    DOCKER_COMPOSE="docker compose"
+    print_success "docker compose V2 trouvé"
+else
+    print_error "Ni 'docker-compose' ni 'docker compose' n'est disponible."
     exit 1
 fi
-print_success "docker-compose trouvé"
 
 # Vérifier si le fichier .env existe
 print_step "Vérification du fichier .env..."
@@ -70,13 +75,13 @@ fi
 
 # Arrêter les conteneurs existants (si présents)
 print_step "Arrêt des conteneurs existants..."
-docker-compose down 2>/dev/null || true
+$DOCKER_COMPOSE down 2>/dev/null || true
 print_success "Conteneurs arrêtés"
 
 # Build des images
 print_step "Construction des images Docker..."
 echo "   Cela peut prendre quelques minutes..."
-if docker-compose build --no-cache; then
+if $DOCKER_COMPOSE build --no-cache; then
     print_success "Images construites avec succès"
 else
     print_error "Échec de la construction des images"
@@ -85,7 +90,7 @@ fi
 
 # Démarrage des conteneurs
 print_step "Démarrage des conteneurs..."
-if docker-compose up -d; then
+if $DOCKER_COMPOSE up -d; then
     print_success "Conteneurs démarrés"
 else
     print_error "Échec du démarrage des conteneurs"
@@ -98,7 +103,7 @@ sleep 5
 
 # Vérifier le statut des conteneurs
 print_step "Vérification du statut des conteneurs..."
-docker-compose ps
+$DOCKER_COMPOSE ps
 
 # Healthcheck
 print_step "Vérification de la santé de l'API..."
@@ -118,7 +123,7 @@ if [ $attempt -eq $max_attempts ]; then
     print_error "L'API ne répond pas après ${max_attempts} tentatives"
     echo ""
     echo "Logs du backend:"
-    docker-compose logs backend
+    $DOCKER_COMPOSE logs backend
     exit 1
 fi
 
@@ -132,14 +137,14 @@ echo "🌐 Application accessible sur: http://localhost"
 echo "📊 API Health: http://localhost/api/health"
 echo ""
 echo "📋 Commandes utiles:"
-echo "   docker-compose logs -f              # Voir les logs en temps réel"
-echo "   docker-compose logs backend         # Logs du backend"
-echo "   docker-compose logs frontend        # Logs du frontend"
-echo "   docker-compose ps                   # Statut des conteneurs"
-echo "   docker-compose restart              # Redémarrer"
-echo "   docker-compose down                 # Arrêter"
+echo "   $DOCKER_COMPOSE logs -f              # Voir les logs en temps réel"
+echo "   $DOCKER_COMPOSE logs backend         # Logs du backend"
+echo "   $DOCKER_COMPOSE logs frontend        # Logs du frontend"
+echo "   $DOCKER_COMPOSE ps                   # Statut des conteneurs"
+echo "   $DOCKER_COMPOSE restart              # Redémarrer"
+echo "   $DOCKER_COMPOSE down                 # Arrêter"
 echo ""
 echo "👤 Créer un compte admin:"
-echo "   docker-compose exec backend node create-admin.js admin@example.com password \"Admin Name\""
+echo "   $DOCKER_COMPOSE exec backend node create-admin.js admin@example.com password \"Admin Name\""
 echo ""
 print_success "Prêt à l'emploi ! 🚀"
