@@ -14,6 +14,34 @@ Application web pour générer automatiquement des posts LinkedIn et Facebook en
 - 👑 **Panneau d'administration** : statistiques, gestion des utilisateurs, configuration
 - 🔒 **Sécurité** : protection CORS, rate limiting, helmet
 
+## 🐳 Installation Docker (Recommandée)
+
+**Installation ultra-rapide avec Docker !**
+
+```bash
+# 1. Cloner et configurer
+git clone <votre-repo>
+cd autopost
+cp .env.docker .env
+nano .env  # Configurez vos clés API
+
+# 2. Déployer
+chmod +x docker-deploy.sh
+./docker-deploy.sh
+
+# ✓ Prêt ! Accédez à http://localhost
+```
+
+**Avantages Docker :**
+- ✅ Installation en 1 commande
+- ✅ Fonctionne sur Windows, Linux, macOS
+- ✅ Mises à jour simplifiées
+- ✅ Isolation complète des dépendances
+
+📖 **Guide complet** : Consultez [DOCKER.md](DOCKER.md) pour la documentation détaillée.
+
+---
+
 ## 🛠️ Stack Technologique
 
 ### Backend
