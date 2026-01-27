@@ -67,7 +67,8 @@ function buildPrompt(params) {
 // Fonction pour générer avec Gemini
 async function generateWithGemini(prompt) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Utiliser gemini-2.0-flash-exp compatible avec l'API actuelle
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
