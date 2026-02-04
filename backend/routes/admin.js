@@ -107,6 +107,78 @@ router.get('/stats', async (req, res) => {
 // GESTION DES UTILISATEURS
 // ============================================
 
+// Créer un nouvel utilisateur
+router.post('/users', async (req, res) => {
+  try {
+    const { email, password, firstname, lastname, role = 'user' } = req.body;
+
+    // Validation
+    if (!email || !password || !firstname || !lastname) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tous les champs sont requis (email, password, firstname, lastname)'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le mot de passe doit contenir au moins 6 caractères'
+      });
+    }
+
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rôle invalide'
+      });
+    }
+
+    // Vérifier si l'email existe déjà
+    const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [email]);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Un utilisateur avec cet email existe déjà'
+      });
+    }
+
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Créer l'utilisateur
+    const result = await db.run(
+      'INSERT INTO users (email, password, firstname, lastname, role) VALUES (?, ?, ?, ?, ?)',
+      [email, hashedPassword, firstname, lastname, role]
+    );
+
+    // Log d'audit
+    await db.run(
+      'INSERT INTO audit_logs (user_id, action, resource, resource_id, details) VALUES (?, ?, ?, ?, ?)',
+      [req.user.id, 'CREATE_USER', 'user', result.id, JSON.stringify({ email, role })]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Utilisateur créé avec succès',
+      user: {
+        id: result.id,
+        email,
+        firstname,
+        lastname,
+        role
+      }
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la création de l\'utilisateur:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
 // Liste de tous les utilisateurs
 router.get('/users', async (req, res) => {
   try {
@@ -225,6 +297,67 @@ router.get('/users/:id', async (req, res) => {
   }
 });
 
+// Modifier un utilisateur
+router.put('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, firstname, lastname } = req.body;
+
+    // Validation
+    if (!email || !firstname || !lastname) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tous les champs sont requis (email, firstname, lastname)'
+      });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const user = await db.get('SELECT id FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    // Vérifier si l'email est déjà utilisé par un autre utilisateur
+    const existingUser = await db.get(
+      'SELECT id FROM users WHERE email = ? AND id != ?',
+      [email, id]
+    );
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cet email est déjà utilisé par un autre utilisateur'
+      });
+    }
+
+    // Mettre à jour l'utilisateur
+    await db.run(
+      'UPDATE users SET email = ?, firstname = ?, lastname = ? WHERE id = ?',
+      [email, firstname, lastname, id]
+    );
+
+    // Log d'audit
+    await db.run(
+      'INSERT INTO audit_logs (user_id, action, resource, resource_id, details) VALUES (?, ?, ?, ?, ?)',
+      [req.user.id, 'UPDATE_USER', 'user', id, JSON.stringify({ email, firstname, lastname })]
+    );
+
+    res.json({
+      success: true,
+      message: 'Utilisateur modifié avec succès'
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la modification de l\'utilisateur:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
 // Modifier le rôle d'un utilisateur
 router.put('/users/:id/role', async (req, res) => {
   try {
@@ -264,6 +397,65 @@ router.put('/users/:id/role', async (req, res) => {
 
   } catch (error) {
     console.error('Erreur lors de la modification du rôle:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
+// Réinitialiser le mot de passe d'un utilisateur
+router.put('/users/:id/password', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    // Validation
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le mot de passe est requis'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le mot de passe doit contenir au moins 6 caractères'
+      });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const user = await db.get('SELECT id FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Mettre à jour le mot de passe
+    await db.run(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [hashedPassword, id]
+    );
+
+    // Log d'audit
+    await db.run(
+      'INSERT INTO audit_logs (user_id, action, resource, resource_id) VALUES (?, ?, ?, ?)',
+      [req.user.id, 'RESET_PASSWORD', 'user', id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Mot de passe réinitialisé avec succès'
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur serveur'

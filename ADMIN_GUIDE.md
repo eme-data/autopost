@@ -113,12 +113,57 @@ Accédez à une vue d'ensemble complète de l'application :
 Gérez tous les utilisateurs de la plateforme :
 
 #### Fonctionnalités :
+- **➕ Créer un utilisateur** : Ajoutez directement des comptes sans auto-inscription
 - **Liste complète** des utilisateurs avec recherche
 - **Pagination** pour les grandes listes
+- **✏️ Modifier un utilisateur** : Email, prénom, nom
+- **🔑 Réinitialiser le mot de passe** : Définir un nouveau mot de passe
 - **Modification du rôle** (user ↔ admin)
 - **Activation/Désactivation** de comptes
-- **Suppression** d'utilisateurs (avec confirmation)
+- **🗑️ Suppression** d'utilisateurs (avec confirmation)
 - **Statistiques par utilisateur** (nombre de posts)
+
+#### Créer un utilisateur secondaire :
+
+**Étape 1 : Accéder au panneau**
+1. Connectez-vous en tant qu'admin
+2. Cliquez sur "Administration" dans la navbar
+3. Allez dans l'onglet "👥 Utilisateurs"
+
+**Étape 2 : Créer le compte**
+1. Cliquez sur le bouton "➕ Créer un utilisateur"
+2. Remplissez le formulaire :
+   - **Email** : Adresse email de l'utilisateur (sera son identifiant)
+   - **Mot de passe** : Au moins 6 caractères (à communiquer à l'utilisateur)
+   - **Prénom** : Prénom de l'utilisateur
+   - **Nom** : Nom de famille
+   - **Rôle** : Choisir "User" pour un accès standard ou "Admin" pour un administrateur
+3. Cliquez sur "Créer l'utilisateur"
+
+**Étape 3 : Communiquer les identifiants**
+- Communiquez l'email et le mot de passe à l'utilisateur de manière sécurisée
+- Recommandez-lui de changer son mot de passe après la première connexion
+
+💡 **Astuce** : L'utilisateur peut modifier son mot de passe depuis son profil utilisateur.
+
+#### Modifier un utilisateur :
+
+1. Dans la liste des utilisateurs, cliquez sur "✏️ Éditer"
+2. Modifiez les informations nécessaires :
+   - Email
+   - Prénom
+   - Nom
+3. Cliquez sur "Enregistrer"
+
+#### Réinitialiser un mot de passe :
+
+1. Dans la modal d'édition de l'utilisateur
+2. Cliquez sur "🔑 Réinitialiser mot de passe"
+3. Saisissez le nouveau mot de passe (au moins 6 caractères)
+4. Cliquez sur "Réinitialiser"
+5. Communiquez le nouveau mot de passe à l'utilisateur
+
+⚠️ **Important** : Toutes ces actions sont enregistrées dans les logs d'audit.
 
 #### Actions disponibles :
 

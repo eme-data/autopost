@@ -83,6 +83,7 @@ router.post('/register', registerValidation, async (req, res) => {
 
 // Route de connexion
 router.post('/login', loginValidation, async (req, res) => {
+  console.log('Login attempt for:', req.body.email);
   try {
     // Vérifier les erreurs de validation
     const errors = validationResult(req);
@@ -112,6 +113,14 @@ router.post('/login', loginValidation, async (req, res) => {
       return res.status(401).json({
         success: false,
         message: 'Email ou mot de passe incorrect'
+      });
+    }
+
+    // Vérifier si le compte est actif
+    if (user.is_active === 0 || user.is_active === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Votre compte a été désactivé. Contactez un administrateur.'
       });
     }
 

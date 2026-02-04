@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = '/api';
+console.log('🔌 API URL forcée:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -68,6 +69,9 @@ export const adminAPI = {
   // Utilisateurs
   getUsers: (params) => api.get('/admin/users', { params }),
   getUser: (id) => api.get(`/admin/users/${id}`),
+  createUser: (userData) => api.post('/admin/users', userData),
+  updateUser: (id, userData) => api.put(`/admin/users/${id}`, userData),
+  resetPassword: (id, password) => api.put(`/admin/users/${id}/password`, { password }),
   updateUserRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
   updateUserStatus: (id, is_active) => api.put(`/admin/users/${id}/status`, { is_active }),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),

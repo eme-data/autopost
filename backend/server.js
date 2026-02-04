@@ -32,6 +32,12 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+// Debug logging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
