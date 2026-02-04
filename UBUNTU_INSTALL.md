@@ -171,8 +171,8 @@ Ajoutez/Modifiez ces variables :
 ```env
 # URL Frontend (HTTPS)
 FRONTEND_URL=https://autopost.example.com
-# Port externe (Laisser 80 ou mettre 8080, Caddy prendra le relais sur 80/443)
-EXTERNAL_PORT=8080
+# Port externe (Laisser 80 ou mettre 127.0.0.1:8080 pour sécurité max car Caddy gère l'accès)
+EXTERNAL_PORT=127.0.0.1:8080
 
 # HTTPS (Caddy)
 DOMAIN_NAME=autopost.example.com
@@ -370,8 +370,8 @@ sudo apt install -y ufw
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow ssh
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
+sudo ufw allow 80/tcp  # OBLIGATOIRE pour redirection HTTP->HTTPS et renouvellement SSL
+sudo ufw allow 443/tcp # HTTPS
 
 # Activer le pare-feu
 sudo ufw enable
