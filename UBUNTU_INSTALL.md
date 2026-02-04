@@ -153,96 +153,63 @@ Ouvrez votre navigateur et accédez à :
 
 ---
 
-## 🌐 Configuration avec Nom de Domaine et HTTPS
+## 🌐 Configuration avec Nom de Domaine et HTTPS (Automatique via Caddy)
 
 ### Prérequis
-- Un nom de domaine (ex: autopost.example.com)
-- DNS configuré pour pointer vers l'IP de votre serveur
+- Un nom de domaine (ex: `autopost.example.com`)
+- DNS configuré pour pointer vers l'IP de votre serveur (Enregistrement A)
 - Ports 80 et 443 ouverts
+- Aucun autre service écoutant sur le port 80/443 (désactivez Nginx/Apache du système s'ils sont installés)
 
-### Étape 1 : Modifier le Port Docker
+### Étape 1 : Configuration de l'environnement
 
 ```bash
 nano .env
 ```
 
-Changez le port pour éviter le conflit avec Nginx système :
+Ajoutez/Modifiez ces variables :
 ```env
-EXTERNAL_PORT=8080
+# URL Frontend (HTTPS)
 FRONTEND_URL=https://autopost.example.com
+# Port externe (Laisser 80 ou mettre 8080, Caddy prendra le relais sur 80/443)
+EXTERNAL_PORT=8080
+
+# HTTPS (Caddy)
+DOMAIN_NAME=autopost.example.com
+EMAIL_SSL=admin@example.com
 ```
 
-Redémarrez Docker :
-```bash
-docker compose up -d
-```
+### Étape 2 : Lancement
 
-### Étape 2 : Installer Nginx (reverse proxy)
-
-```bash
-sudo apt install -y nginx
-```
-
-### Étape 3 : Configurer Nginx
+Lancez la stack complète avec la configuration de production (incluant Caddy) :
 
 ```bash
-sudo nano /etc/nginx/sites-available/autopost
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
-Configuration :
-```nginx
-server {
-    listen 80;
-    server_name autopost.example.com;
+C'est tout ! Caddy va :
+1. Démarrer sur les ports 80 et 443.
+2. Obtenir automatiquement un certificat SSL valide chez Let's Encrypt.
+3. Configurer le reverse proxy vers votre application.
+4. Gérer le renouvellement automatique.
 
-    location / {
-        proxy_pass http://localhost:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
+### Étape 3 : Vérification
 
-Activer le site :
-```bash
-sudo ln -s /etc/nginx/sites-available/autopost /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
+Accédez simplement à `https://autopost.example.com`
 
-### Étape 4 : Installer le Certificat SSL (Let's Encrypt)
-
-```bash
-# Installer Certbot
-sudo apt install -y certbot python3-certbot-nginx
-
-# Obtenir le certificat SSL
-sudo certbot --nginx -d autopost.example.com
-
-# Renouvellement automatique (déjà configuré par Certbot)
-sudo certbot renew --dry-run
-```
-
-### Étape 5 : Mettre à Jour les URLs OAuth
+### Étape 4 : Mettre à Jour les URLs OAuth
 
 Éditez `.env` et mettez à jour les URLs de callback :
 ```env
 LINKEDIN_REDIRECT_URI=https://autopost.example.com/api/oauth/linkedin/callback
 FACEBOOK_REDIRECT_URI=https://autopost.example.com/api/oauth/facebook/callback
+INSTAGRAM_REDIRECT_URI=https://autopost.example.com/api/oauth/instagram/callback
 ```
 
-Redémarrez :
+Redémarrez pour appliquer :
 ```bash
 docker compose restart
 ```
-
-**✅ Votre application est maintenant accessible en HTTPS !**
 
 ---
 

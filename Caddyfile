@@ -1,0 +1,7 @@
+{
+    email {$EMAIL_SSL}
+}
+
+{$DOMAIN_NAME} {
+    reverse_proxy frontend:80
+}

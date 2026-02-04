@@ -30,3 +30,25 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - EMAIL_SSL=${EMAIL_SSL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+    networks:
+      - autopost-network
+
+volumes:
+  caddy_data:
+  caddy_config:
