@@ -59,13 +59,25 @@ class Database {
         include_emojis BOOLEAN,
         published_to_linkedin BOOLEAN DEFAULT 0,
         published_to_facebook BOOLEAN DEFAULT 0,
+        published_to_instagram BOOLEAN DEFAULT 0,
         linkedin_post_url TEXT,
         facebook_post_url TEXT,
+        instagram_post_url TEXT,
+        image_url TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )
     `);
+
+    // Migrations existantes
+    this.db.run(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'`, () => { });
+    this.db.run(`ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1`, () => { });
+
+    // Migration Instagram & Images
+    this.db.run(`ALTER TABLE posts ADD COLUMN published_to_instagram BOOLEAN DEFAULT 0`, () => { });
+    this.db.run(`ALTER TABLE posts ADD COLUMN instagram_post_url TEXT`, () => { });
+    this.db.run(`ALTER TABLE posts ADD COLUMN image_url TEXT`, () => { });
 
     // Table des comptes sociaux connectés
     this.db.run(`
@@ -121,7 +133,7 @@ class Database {
   // Méthode pour exécuter des requêtes
   run(sql, params = []) {
     return new Promise((resolve, reject) => {
-      this.db.run(sql, params, function(err) {
+      this.db.run(sql, params, function (err) {
         if (err) reject(err);
         else resolve({ id: this.lastID, changes: this.changes });
       });

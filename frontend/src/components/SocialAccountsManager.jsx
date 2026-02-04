@@ -4,7 +4,8 @@ import { oauthAPI } from '../services/api';
 const SocialAccountsManager = () => {
   const [accounts, setAccounts] = useState({
     linkedin: null,
-    facebook: null
+    facebook: null,
+    instagram: null
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -24,6 +25,12 @@ const SocialAccountsManager = () => {
 
     if (params.get('facebook_connected') === 'true') {
       setSuccess('Compte Facebook connecté avec succès !');
+      window.history.replaceState({}, '', '/dashboard');
+      loadConnectedAccounts();
+    }
+
+    if (params.get('instagram_connected') === 'true') {
+      setSuccess('Compte Instagram connecté avec succès !');
       window.history.replaceState({}, '', '/dashboard');
       loadConnectedAccounts();
     }
@@ -73,14 +80,29 @@ const SocialAccountsManager = () => {
     }
   };
 
+  const connectInstagram = async () => {
+    try {
+      const response = await oauthAPI.getInstagramAuthUrl();
+      if (response.data.success) {
+        window.location.href = response.data.authUrl;
+      }
+    } catch (err) {
+      setError('Erreur lors de la connexion à Instagram');
+    }
+  };
+
   const disconnectAccount = async (platform) => {
-    if (!confirm(`Êtes-vous sûr de vouloir déconnecter votre compte ${platform === 'linkedin' ? 'LinkedIn' : 'Facebook'} ?`)) {
+    let platformName = 'Facebook';
+    if (platform === 'linkedin') platformName = 'LinkedIn';
+    if (platform === 'instagram') platformName = 'Instagram';
+
+    if (!confirm(`Êtes-vous sûr de vouloir déconnecter votre compte ${platformName} ?`)) {
       return;
     }
 
     try {
       await oauthAPI.disconnectAccount(platform);
-      setSuccess(`Compte ${platform === 'linkedin' ? 'LinkedIn' : 'Facebook'} déconnecté`);
+      setSuccess(`Compte ${platformName} déconnecté`);
       loadConnectedAccounts();
     } catch (err) {
       setError('Erreur lors de la déconnexion');
@@ -129,7 +151,7 @@ const SocialAccountsManager = () => {
         </div>
       )}
 
-      <div className="grid grid-2" style={{ gap: '20px' }}>
+      <div className="grid grid-3" style={{ gap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
         {/* LinkedIn */}
         <div style={{
           border: '2px solid #e2e8f0',
@@ -258,6 +280,72 @@ const SocialAccountsManager = () => {
               style={{ width: '100%' }}
             >
               Connecter Facebook
+            </button>
+          )}
+        </div>
+
+        {/* Instagram */}
+        <div style={{
+          border: '2px solid #e2e8f0',
+          borderRadius: '8px',
+          padding: '20px',
+          backgroundColor: accounts.instagram ? '#f0fff4' : '#f7fafc'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '15px',
+              color: 'white',
+              fontSize: '24px',
+              fontWeight: 'bold'
+            }}>
+              IG
+            </div>
+            <div>
+              <h3 style={{ margin: 0, color: '#333' }}>Instagram</h3>
+              <p style={{ margin: 0, fontSize: '14px', color: '#718096' }}>
+                {accounts.instagram ? 'Connecté' : 'Non connecté'}
+              </p>
+            </div>
+          </div>
+
+          {accounts.instagram ? (
+            <>
+              <div style={{ marginBottom: '15px' }}>
+                <p style={{ fontSize: '14px', color: '#4a5568', margin: '5px 0' }}>
+                  <strong>Compte :</strong> {accounts.instagram.username}
+                </p>
+                <p style={{ fontSize: '14px', color: '#4a5568', margin: '5px 0' }}>
+                  <strong>Expire le :</strong> {formatExpiryDate(accounts.instagram.expiresAt)}
+                </p>
+                {!accounts.instagram.isValid && (
+                  <p style={{ fontSize: '14px', color: '#c53030', margin: '5px 0' }}>
+                    ⚠️ Token expiré - Reconnectez-vous
+                  </p>
+                )}
+              </div>
+
+              <button
+                onClick={() => disconnectAccount('instagram')}
+                className="btn btn-danger"
+                style={{ width: '100%' }}
+              >
+                Déconnecter
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={connectInstagram}
+              className="btn btn-primary"
+              style={{ width: '100%' }}
+            >
+              Connecter Instagram
             </button>
           )}
         </div>

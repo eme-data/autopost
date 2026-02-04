@@ -139,8 +139,145 @@ async function publishToFacebook(userId, content) {
 }
 
 // ============================================
+// PUBLICATION INSTAGRAM
+// ============================================
+
+async function publishToInstagram(userId, content, imageUrl) {
+  try {
+    if (!imageUrl) {
+      throw new Error('Une image est requise pour publier sur Instagram');
+    }
+
+    // Récupérer le token d'accès
+    const account = await db.get(
+      `SELECT access_token, expires_at, platform_user_id
+       FROM social_accounts
+       WHERE user_id = ? AND platform = 'instagram'`,
+      [userId]
+    );
+
+    if (!account) {
+      throw new Error('Compte Instagram non connecté');
+    }
+
+    // Vérifier si le token est encore valide
+    // Note: Les tokens longue durée FB/Insta sont validés par l'appel API, mais on peut vérifier la date
+    if (new Date(account.expires_at) <= new Date()) {
+      // On pourrait rafraichir ici, mais pour l'instant on demande reconnexion
+      throw new Error('Token Instagram expiré. Veuillez reconnecter votre compte.');
+    }
+
+    const igUserId = account.platform_user_id;
+    const accessToken = account.access_token;
+
+    // 1. Créer le conteneur média
+    const containerResponse = await axios.post(
+      `https://graph.facebook.com/v18.0/${igUserId}/media`,
+      {
+        image_url: imageUrl,
+        caption: content,
+        access_token: accessToken
+      }
+    );
+
+    const creationId = containerResponse.data.id;
+
+    // 2. Publier le conteneur
+    const publishResponse = await axios.post(
+      `https://graph.facebook.com/v18.0/${igUserId}/media_publish`,
+      {
+        creation_id: creationId,
+        access_token: accessToken
+      }
+    );
+
+    const postId = publishResponse.data.id;
+
+    // Récupérer le permalink (optionnel, mais sympa pour l'UI)
+    let permalink = `https://www.instagram.com/p/${postId}/`; // Fallback simple car l'ID n'est pas le shortcode
+    try {
+      const permalinkResponse = await axios.get(
+        `https://graph.facebook.com/v18.0/${postId}`, {
+        params: {
+          fields: 'permalink',
+          access_token: accessToken
+        }
+      }
+      );
+      if (permalinkResponse.data.permalink) {
+        permalink = permalinkResponse.data.permalink;
+      }
+    } catch (e) {
+      // Ignorer erreur permalink
+    }
+
+    return {
+      success: true,
+      postId: postId,
+      url: permalink
+    };
+
+  } catch (error) {
+    console.error('Erreur publication Instagram:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.error?.message ||
+      error.message ||
+      'Erreur lors de la publication sur Instagram'
+    );
+  }
+}
+
+// ============================================
 // ROUTES API
 // ============================================
+
+// Publier sur Instagram
+router.post('/instagram', authenticateToken, async (req, res) => {
+  try {
+    const { content, imageUrl, postId } = req.body;
+
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le contenu du post est requis'
+      });
+    }
+
+    if (!imageUrl) {
+      return res.status(400).json({
+        success: false,
+        message: 'Une image est requise pour publier sur Instagram'
+      });
+    }
+
+    const result = await publishToInstagram(req.user.id, content, imageUrl);
+
+    // Mettre à jour le post dans la base de données si un ID est fourni
+    if (postId) {
+      await db.run(
+        `UPDATE posts
+         SET published_to_instagram = 1,
+             instagram_post_url = ?,
+             image_url = ?,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = ? AND user_id = ?`,
+        [result.url, imageUrl, postId, req.user.id]
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'Post publié sur Instagram avec succès',
+      url: result.url
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 
 // Publier sur LinkedIn
 router.post('/linkedin', authenticateToken, async (req, res) => {

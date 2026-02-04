@@ -14,13 +14,15 @@ const Generator = ({ onPostGenerated }) => {
 
   const [generatedPost, setGeneratedPost] = useState('');
   const [generatedPostId, setGeneratedPostId] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [publishing, setPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState('');
   const [connectedAccounts, setConnectedAccounts] = useState({
     linkedin: null,
-    facebook: null
+    facebook: null,
+    instagram: null
   });
 
   useEffect(() => {
@@ -82,6 +84,7 @@ const Generator = ({ onPostGenerated }) => {
     setGeneratedPost('');
     setGeneratedPostId(null);
     setPublishSuccess('');
+    setImageUrl('');
     setFormData({
       topic: '',
       platform: 'linkedin',
@@ -146,6 +149,41 @@ const Generator = ({ onPostGenerated }) => {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la publication sur Facebook');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handlePublishInstagram = async () => {
+    if (!connectedAccounts.instagram?.isValid) {
+      setError('Compte Instagram non connecté ou expiré. Connectez votre compte dans la section "Comptes de réseaux sociaux".');
+      return;
+    }
+
+    if (!imageUrl) {
+      setError('Une image est requise pour publier sur Instagram.');
+      return;
+    }
+
+    setPublishing(true);
+    setError('');
+    setPublishSuccess('');
+
+    try {
+      const response = await publishAPI.publishToInstagram({
+        content: generatedPost,
+        imageUrl: imageUrl,
+        postId: generatedPostId
+      });
+
+      if (response.data.success) {
+        setPublishSuccess(`Post publié sur Instagram avec succès ! Voir: ${response.data.url}`);
+        if (onPostGenerated) {
+          onPostGenerated();
+        }
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erreur lors de la publication sur Instagram');
     } finally {
       setPublishing(false);
     }
@@ -224,6 +262,7 @@ const Generator = ({ onPostGenerated }) => {
             >
               <option value="linkedin">LinkedIn</option>
               <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
             </select>
           </div>
 
@@ -323,13 +362,28 @@ const Generator = ({ onPostGenerated }) => {
             {generatedPost}
           </div>
 
+          <div className="form-group" style={{ marginTop: '20px' }}>
+            <label htmlFor="imageUrl">URL de l'image (Requis pour Instagram)</label>
+            <input
+              type="url"
+              id="imageUrl"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://exemple.com/image.jpg"
+              style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}
+            />
+            <small style={{ color: '#718096', display: 'block', marginTop: '5px' }}>
+              L'image doit être publiquement accessible.
+            </small>
+          </div>
+
           {publishSuccess && (
             <div className="success-message" style={{ marginTop: '15px' }}>
               {publishSuccess}
             </div>
           )}
 
-          <div className="post-actions" style={{ marginTop: '15px' }}>
+          <div className="post-actions" style={{ marginTop: '15px', flexWrap: 'wrap' }}>
             <button onClick={copyToClipboard} className="btn btn-secondary">
               Copier
             </button>
@@ -340,7 +394,7 @@ const Generator = ({ onPostGenerated }) => {
               disabled={publishing || !connectedAccounts.linkedin?.isValid}
               title={!connectedAccounts.linkedin?.isValid ? 'Connectez votre compte LinkedIn' : 'Publier sur LinkedIn'}
             >
-              {publishing ? 'Publication...' : 'Publier sur LinkedIn'}
+              LinkedIn
             </button>
 
             <button
@@ -349,25 +403,35 @@ const Generator = ({ onPostGenerated }) => {
               disabled={publishing || !connectedAccounts.facebook?.isValid}
               title={!connectedAccounts.facebook?.isValid ? 'Connectez votre compte Facebook' : 'Publier sur Facebook'}
             >
-              {publishing ? 'Publication...' : 'Publier sur Facebook'}
+              Facebook
+            </button>
+
+            <button
+              onClick={handlePublishInstagram}
+              className="btn btn-primary"
+              style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', border: 'none' }}
+              disabled={publishing || !connectedAccounts.instagram?.isValid || !imageUrl}
+              title={!connectedAccounts.instagram?.isValid ? 'Connectez votre compte Instagram' : (!imageUrl ? 'Image requise' : 'Publier sur Instagram')}
+            >
+              Instagram
             </button>
 
             <button
               onClick={handlePublishBoth}
               className="btn btn-primary"
               disabled={publishing || (!connectedAccounts.linkedin?.isValid && !connectedAccounts.facebook?.isValid)}
-              title={(!connectedAccounts.linkedin?.isValid && !connectedAccounts.facebook?.isValid) ? 'Connectez au moins un compte' : 'Publier sur les deux'}
+              title={(!connectedAccounts.linkedin?.isValid && !connectedAccounts.facebook?.isValid) ? 'Connectez au moins un compte' : 'Publier sur LI + FB'}
               style={{ background: 'linear-gradient(135deg, #0077b5 0%, #1877f2 100%)' }}
             >
-              {publishing ? 'Publication...' : 'Publier sur les deux'}
+              LI + FB
             </button>
 
             <button onClick={handleReset} className="btn btn-secondary">
-              Nouveau post
+              Annuler
             </button>
           </div>
 
-          {(!connectedAccounts.linkedin?.isValid && !connectedAccounts.facebook?.isValid) && (
+          {(!connectedAccounts.linkedin?.isValid && !connectedAccounts.facebook?.isValid && !connectedAccounts.instagram?.isValid) && (
             <div style={{
               marginTop: '15px',
               padding: '12px',
@@ -377,7 +441,7 @@ const Generator = ({ onPostGenerated }) => {
               color: '#c53030',
               borderLeft: '4px solid #f56565'
             }}>
-              ⚠️ Connectez vos comptes LinkedIn et/ou Facebook dans la section "Comptes de réseaux sociaux" pour publier automatiquement.
+              ⚠️ Connectez vos comptes dans la section "Comptes de réseaux sociaux" pour publier automatiquement.
             </div>
           )}
         </div>

@@ -52,6 +52,7 @@ export const postsAPI = {
 export const oauthAPI = {
   getLinkedInAuthUrl: () => api.get('/oauth/linkedin/auth-url'),
   getFacebookAuthUrl: () => api.get('/oauth/facebook/auth-url'),
+  getInstagramAuthUrl: () => api.get('/oauth/instagram/auth-url'),
   getConnectedAccounts: () => api.get('/oauth/connected-accounts'),
   disconnectAccount: (platform) => api.delete(`/oauth/disconnect/${platform}`)
 };
@@ -59,6 +60,7 @@ export const oauthAPI = {
 export const publishAPI = {
   publishToLinkedIn: (data) => api.post('/publish/linkedin', data),
   publishToFacebook: (data) => api.post('/publish/facebook', data),
+  publishToInstagram: (data) => api.post('/publish/instagram', data),
   publishToBoth: (data) => api.post('/publish/both', data)
 };
 

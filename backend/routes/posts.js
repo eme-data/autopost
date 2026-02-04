@@ -14,7 +14,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 // Validation des paramètres de génération
 const generateValidation = [
   body('topic').trim().notEmpty().withMessage('Le sujet est requis'),
-  body('platform').isIn(['linkedin', 'facebook']).withMessage('Plateforme invalide'),
+  body('platform').isIn(['linkedin', 'facebook', 'instagram']).withMessage('Plateforme invalide'),
   body('aiModel').isIn(['gemini', 'groq']).withMessage('Modèle IA invalide'),
   body('tone').optional().isIn(['professional', 'casual', 'enthusiastic', 'informative']),
   body('length').optional().isIn(['short', 'medium', 'long']),
@@ -41,7 +41,8 @@ function buildPrompt(params) {
 
   const platformGuide = {
     linkedin: 'LinkedIn (réseau professionnel)',
-    facebook: 'Facebook (réseau social grand public)'
+    facebook: 'Facebook (réseau social grand public)',
+    instagram: 'Instagram (réseau visuel et lifestyle)'
   };
 
   let prompt = `Génère un post engageant pour ${platformGuide[platform]} sur le sujet suivant : "${topic}".\n\n`;
@@ -54,6 +55,11 @@ function buildPrompt(params) {
   if (platform === 'linkedin') {
     prompt += `- Adopte un style adapté au monde professionnel\n`;
     prompt += `- Mets en avant la valeur ajoutée et les insights\n`;
+  } else if (platform === 'instagram') {
+    prompt += `- Adopte un style visuel et accrocheur\n`;
+    prompt += `- Utilise des sauts de ligne pour aérer le texte\n`;
+    prompt += `- Invite à l'interaction (Call to Action)\n`;
+    prompt += `- Le texte doit accompagner une image (référence l'image implicitement si besoin)\n`;
   } else {
     prompt += `- Adopte un style convivial et accessible\n`;
     prompt += `- Favorise l'engagement et les interactions\n`;
